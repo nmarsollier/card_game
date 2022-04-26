@@ -1,0 +1,39 @@
+# Este es un compose que trae desde github el Dockerfile, compila y crea la imagen.
+# Util para devs porque estamos haciendo build directamente desde el codigo fuente de github.
+version: "3"
+services:
+    card_game_ongo:
+        container_name: card_game_mongo
+        ports:
+            - "27017:27017"
+        image: "mongo:4.0.18-xenial"
+    card_game_redis:
+        container_name: card_game_redis
+        ports:
+            - "6379:6379"
+        image: "redis:5.0.9-buster"
+    card_game_node:
+        build:
+            context: https://raw.githubusercontent.com/nmarsollier/card_game_node/master/Dockerfile
+        container_name: card_game_node
+        image: card_game_node
+        extra_hosts:
+            - "host.docker.internal:172.17.0.1"
+        ports:
+            - "3000:3000"
+        depends_on:
+            - "card_game_mongo"
+            - "card_game_redis"
+    card_game_react:
+        build:
+            context: https://raw.githubusercontent.com/nmarsollier/card_game_react/master/Dockerfile
+        container_name: card_game_react
+        extra_hosts:
+            - "host.docker.internal:172.17.0.1"
+        ports:
+            - '4200:80'
+        image: card_game_react
+
+networks:
+    default:
+        driver: bridge
